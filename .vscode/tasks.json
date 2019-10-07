@@ -3,13 +3,14 @@
     "tasks": [
         {
             "command": "npm",
-            "label": "npm",
+            "label": "watch",
             "type": "shell",
             "presentation": {
                 "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared"
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "clear": true
             },
             "args": [
                 "run",
@@ -18,7 +19,17 @@
                 "silent"
             ],
             "isBackground": true,
-            "problemMatcher": "$tsc-watch"
+            "problemMatcher": {
+                "owner": "custom",
+                "pattern": {
+                    "regexp": "__________"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^Compilation\\s+starting",
+                    "endsPattern": ".*hidden modules"
+                }
+            }
         },
         {
             "type": "shell",

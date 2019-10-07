@@ -28,9 +28,9 @@
         "preversion": "npm run build && npm run tslint && npm run test",
         "prepare": "npm run build",
         "vscode:prepublish": "npm run build",
-        "build": "tsc -p ./src",
+        "build": "webpack --mode=production --info-verbosity verbose",
         "tslint": "tslint ./src/**/*.ts",
-        "watch": "tsc -w -p ./src",
+        "watch": "webpack --mode development --watch",
         "build-and-test": "npm run build && npm run test",
         "test": "ts-mocha \"src/**/*.spec.ts\" --full-trace",
         "test:coverage": "nyc mocha src/**/*.spec.ts --full-trace --bail",
@@ -84,17 +84,20 @@
         "nyc": "^14.1.1",
         "sinon": "^7.2.3",
         "source-map-support": "^0.5.9",
+        "ts-loader": "^6.1.1",
         "ts-mocha": "^6.0.0",
         "ts-node": "^8.0.2",
         "tslint": "^5.11.0",
         "tslint-eslint-rules": "^5.4.0",
         "tslint-origin-ordered-imports-rule": "^1.1.2",
         "typescript": "^3.2.1",
-        "vsce": "^1.50.0",
+        "vsce": "^1.66.0",
         "vscode": "^1.1.33",
-        "vscode-debugadapter-testsupport": "1.33.0"
+        "vscode-debugadapter-testsupport": "1.33.0",
+        "webpack": "^4.40.2",
+        "webpack-cli": "^3.3.9"
     },
-    "main": "./out/extension",
+    "main": "./dist/extension",
     "activationEvents": [
         "onDebug",
         "onLanguage:brightscript",
@@ -153,7 +156,7 @@
             {
                 "type": "brightscript",
                 "label": "BrightScript Debug",
-                "program": "./out/debugAdapter.js",
+                "program": "./dist/debugAdapter.js",
                 "runtime": "node",
                 "configurationAttributes": {
                     "launch": {

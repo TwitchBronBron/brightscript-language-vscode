@@ -29,10 +29,10 @@ export default class BrightScriptCommands {
 
         subscriptions.push(vscode.commands.registerCommand('extension.brightscript.toggleXML', () => {
             this.onToggleXml();
-        } ));
+        }));
         subscriptions.push(vscode.commands.registerCommand('extension.brightscript.sendRemoteCommand', (key: string) => {
             this.sendRemoteCommand(key);
-        } ));
+        }));
 
         subscriptions.push(vscode.commands.registerCommand('extension.brightscript.sendRemoteText', async () => {
             let stuffUserTyped: string = await vscode.window.showInputBox({
@@ -46,7 +46,7 @@ export default class BrightScriptCommands {
                 }
             }
             vscode.commands.executeCommand('workbench.action.focusPanel');
-        } ));
+        }));
 
         subscriptions.push(vscode.commands.registerCommand('extension.brightscript.pressBackButton', () => {
             this.sendRemoteCommand('Back');

@@ -5,12 +5,12 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"name": "Extension",
-			"preLaunchTask": "npm",
+			"preLaunchTask": "watch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
-			"outFiles": [ "${workspaceFolder}/out/**/*.js" ]
+			"outFiles": [ "${workspaceFolder}/dist/**/*.js" ]
 		},
 		{
 			"type": "node",
@@ -19,7 +19,7 @@
 			"cwd": "${workspaceFolder}",
 			"program": "${workspaceFolder}/src/debugAdapter.ts",
 			"args": [ "--server=4711" ],
-			"outFiles": [ "${workspaceFolder}/out/**/*.js" ],
+			"outFiles": [ "${workspaceFolder}/dist/**/*.js" ],
 			"stopOnEntry": false
 		},
 		{
