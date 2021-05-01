@@ -1,0 +1,118 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    font-family: sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.heading {
+    position: relative;
+}
+
+.heading:hover .link-sharp {
+    display: block;
+}
+
+.link-sharp {
+    position: absolute;
+    display: none;
+    left: -20px;
+}
+
+#content {
+    padding: 30px;
+    overflow: auto;
+}
+
+#content a [id] {
+    color: initial;
+}
+
+#content a {
+    color: #662d91;
+    font-weight: bold;
+}
+
+#footer {
+    height: 200px;
+}
+
+#navbar {
+    background-color: #662d91;
+    width: 100%;
+    height: 50px;
+    box-shadow: 1px -9px 13px 9px #000000bf;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    color: white;
+}
+
+#body-area {
+    display: flex;
+    flex-direction: row;
+    height: calc(100% - 50px);
+}
+
+#sidebar {
+    height: 100%;
+    flex: 0 0 300px;
+    border-right: 1px solid lightgrey;
+    overflow: auto;
+}
+
+#sidebar .entry {
+    padding: 15px;
+    cursor: pointer;
+    display: block;
+}
+
+#sidebar a:hover {
+    background-color: rgba(0, 0, 0, .05);
+}
+
+.folder {
+    display: block;
+}
+
+.folder .name {
+    font-weight: bold;
+}
+
+#sidebar>.folder>.children {
+    padding-left: 0 !important;
+}
+
+.folder .children {
+    padding-left: 25px;
+}
+
+code {
+    display: inline;
+    padding: .2em .4em;
+    background-color: #ebebeb;
+    border-radius: 6px;
+}
+
+pre code {
+    background-color: #f6f8fa !important;
+}
