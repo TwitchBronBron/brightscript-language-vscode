@@ -41,7 +41,8 @@
         "clean": "rimraf dist",
         "install-local": "node scripts/install-local.js",
         "install-pull-local": "node scripts/install-local.js --pull",
-        "uninstall-local": "node scripts/uninstall-local.js"
+        "uninstall-local": "node scripts/uninstall-local.js",
+        "sync-syntaxes": "node scripts/sync-scenegraph-tmlanguage.js"
     },
     "dependencies": {
         "array-sort": "^1.0.0",

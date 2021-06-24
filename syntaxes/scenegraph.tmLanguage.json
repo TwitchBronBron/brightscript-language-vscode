@@ -1,9 +1,6 @@
 {
-    "scopeName": "scenegraph.xml",
     "name": "scenegraph",
-    "fileTypes": [
-        "xml"
-    ],
+    "scopeName": "scenegraph.xml",
     "patterns": [
         {
             "begin": "(<\\?)\\s*([-_a-zA-Z0-9]+)",
@@ -191,7 +188,7 @@
                     "name": "punctuation.definition.string.end.xml"
                 }
             },
-            "name": "source.brighterscript.embedded.xml",
+            "name": "source.brighterscript.embedded.scenegraph",
             "patterns": [
                 {
                     "include": "source.brs"
@@ -341,7 +338,7 @@
                             "name": "entity.other.attribute-name.localname.xml"
                         }
                     },
-                    "match": "(?:^|\\s+)(?:([-\\w.]+)((:)))?([-\\w.:]+)="
+                    "match": "(?:^|\\s+)(?:([-\\w.]+)((:)))?([-\\w.:]+)\\s*="
                 },
                 {
                     "include": "#doublequotedString"
@@ -352,15 +349,41 @@
             ]
         },
         "comments": {
-            "begin": "<[!%]--",
-            "captures": {
-                "0": {
-                    "name": "punctuation.definition.comment.xml"
+            "patterns": [
+                {
+                    "begin": "<%--",
+                    "captures": {
+                        "0": {
+                            "name": "punctuation.definition.comment.xml"
+                        },
+                        "end": "--%>",
+                        "name": "comment.block.xml"
+                    }
+                },
+                {
+                    "begin": "<!--",
+                    "captures": {
+                        "0": {
+                            "name": "punctuation.definition.comment.xml"
+                        }
+                    },
+                    "end": "-->",
+                    "name": "comment.block.xml",
+                    "patterns": [
+                        {
+                            "begin": "--(?!>)",
+                            "captures": {
+                                "0": {
+                                    "name": "invalid.illegal.bad-comments-or-CDATA.xml"
+                                }
+                            }
+                        }
+                    ]
                 }
-            },
-            "end": "--%?>",
-            "name": "comment.block.xml"
+            ]
         }
     },
-    "version": "https://github.com/atom/language-xml/commit/f461d428fb87040cb8a52d87d0b95151b9d3c0cc"
+    "fileTypes": [
+        "xml"
+    ]
 }
