@@ -3,16 +3,19 @@ import * as prettyBytes from 'pretty-bytes';
 import { window } from 'vscode';
 import { gte as semverGte } from 'semver';
 import { env, extensions } from 'vscode';
+import * as rta from 'roku-test-automation';
+
 import { ActiveDeviceManager } from './ActiveDeviceManager';
 import { brightScriptCommands } from './BrightScriptCommands';
 import BrightScriptXmlDefinitionProvider from './BrightScriptXmlDefinitionProvider';
-import { BrightScriptDebugConfigurationProvider } from './DebugConfigurationProvider';
+import { BrightScriptDebugConfigurationProvider, BrightScriptLaunchConfiguration } from './DebugConfigurationProvider';
 import { DeclarationProvider } from './DeclarationProvider';
 import { DefinitionRepository } from './DefinitionRepository';
 import { Formatter } from './formatter';
 import { LogDocumentLinkProvider } from './LogDocumentLinkProvider';
 import { LogOutputManager } from './LogOutputManager';
 import { RendezvousViewProvider } from './RendezvousViewProvider';
+import { RDBCommandsViewProvider, RDBRegistryViewProvider } from './RDBViewProviders';
 import { sceneGraphDebugCommands } from './SceneGraphDebugCommands';
 import { GlobalStateManager } from './GlobalStateManager';
 import { languageServerManager } from './LanguageServerManager';
@@ -20,12 +23,23 @@ import { languageServerManager } from './LanguageServerManager';
 const EXTENSION_ID = 'RokuCommunity.brightscript';
 
 export class Extension {
-
     public outputChannel: vscode.OutputChannel;
     public sceneGraphDebugChannel: vscode.OutputChannel;
     public debugServerOutputChannel: vscode.OutputChannel;
     public globalStateManager: GlobalStateManager;
     private chanperfStatusBar: vscode.StatusBarItem;
+
+    public odc?: rta.OnDeviceComponent;
+
+    // register our RDB views
+    private rdbViews = {
+        RDBRegistryView: {
+            class: RDBRegistryViewProvider
+        },
+        RDBCommandsView: {
+            class: RDBCommandsViewProvider
+        }
+    };
 
     public async activate(context: vscode.ExtensionContext) {
         this.globalStateManager = new GlobalStateManager(context);
@@ -39,7 +53,7 @@ export class Extension {
 
         let activeDeviceManager = new ActiveDeviceManager();
 
-        const declarationProvider: DeclarationProvider = new DeclarationProvider();
+        const declarationProvider = new DeclarationProvider();
         context.subscriptions.push(declarationProvider);
 
         //create channels
@@ -50,10 +64,9 @@ export class Extension {
 
         let docLinkProvider = new LogDocumentLinkProvider();
 
-        const logOutputManager: LogOutputManager = new LogOutputManager(this.outputChannel, context, docLinkProvider, declarationProvider);
+        const logOutputManager = new LogOutputManager(this.outputChannel, context, docLinkProvider, declarationProvider);
 
         const definitionRepo = new DefinitionRepository(declarationProvider);
-        context.subscriptions.push(declarationProvider);
 
         let languageServerPromise = languageServerManager.init(context, definitionRepo);
 
@@ -112,9 +125,10 @@ export class Extension {
         //give the launch config to the link provider any time we launch the app
         vscode.debug.onDidReceiveDebugSessionCustomEvent(async (e) => {
             if (e.event === 'BSLaunchStartEvent') {
-                docLinkProvider.setLaunchConfig(e.body);
-                logOutputManager.setLaunchConfig(e.body);
-
+                const config: BrightScriptLaunchConfiguration = e.body;
+                docLinkProvider.setLaunchConfig(config);
+                logOutputManager.setLaunchConfig(config);
+                this.setupRDB(context, config);
                 //write debug server log statements to the DebugServer output channel
             } else if (e.event === 'BSDebugServerLogOutputEvent') {
                 this.debugServerOutputChannel.appendLine(e.body);
@@ -235,6 +249,42 @@ export class Extension {
                 }
                 this.globalStateManager.lastSeenReleaseNotesVersion = currentExtensionVersion;
             }
+        }
+    }
+
+    private setupODC(config: BrightScriptLaunchConfiguration) {
+        const rtaConfig: rta.ConfigOptions = {
+            RokuDevice: {
+                devices: [{
+                    host: config.host,
+                    password: config.password
+                }]
+            },
+            // uncomment for debugging
+            // OnDeviceComponent: {
+            //     logLevel: 'verbose',
+            //     serverDebugLogging: true
+            // }
+        };
+        const device = new rta.RokuDevice(rtaConfig);
+        return new rta.OnDeviceComponent(device, rtaConfig);
+    }
+
+    private setupRDB(context: vscode.ExtensionContext, config: BrightScriptLaunchConfiguration) {
+        // TODO handle case where user changes their Roku Device
+        if (!config.injectRdbOnDeviceComponent || this.odc) {
+            return;
+        }
+        this.odc = this.setupODC(config);
+
+        for (const viewId in this.rdbViews) {
+            const view = this.rdbViews[viewId];
+            view.provider = new view.class(context);
+            vscode.window.registerWebviewViewProvider(viewId, view.provider);
+        }
+
+        for (const viewId in this.rdbViews) {
+            this.rdbViews[viewId].provider.setOnDeviceComponent(this.odc);
         }
     }
 

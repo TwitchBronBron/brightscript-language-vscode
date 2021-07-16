@@ -28,11 +28,11 @@
         "preversion": "npm run build && npm run lint && npm run test && npm run check-extraneous && node scripts/preversion.js",
         "vscode:prepublish": "npm run build",
         "copy-schema": "cpx ./node_modules/brighterscript/bsconfig.schema.json ./dist -L",
-        "build": "npm run copy-schema && tsc -p ./",
+        "build": "npm run copy-schema && tsc -p ./ && npm run svelte-build",
         "lint": "tslint \"./src/**/*.ts\"",
         "watch": "npm run copy-schema && tsc -w -p ./",
-        "test": "nyc mocha \"src/**/*.spec.ts\" --full-trace --bail",
-        "test:nocover": "ts-mocha \"src/**/*.spec.ts\" --full-trace",
+        "test": "nyc mocha \"src/**/*.spec.ts\" \"ui/**/*.spec.ts\" --full-trace --bail",
+        "test:nocover": "ts-mocha \"src/**/*.spec.ts\" \"ui/**/*.spec.ts\" --full-trace",
         "publish-coverage": "nyc report --reporter=text-lcov | coveralls",
         "check-extraneous": "npm list --production --parseable --depth=99999",
         "package": "vsce package",
@@ -41,12 +41,15 @@
         "clean": "rimraf dist",
         "install-local": "node scripts/install-local.js",
         "install-pull-local": "node scripts/install-local.js --pull",
-        "uninstall-local": "node scripts/uninstall-local.js"
+        "uninstall-local": "node scripts/uninstall-local.js",
+        "validate": "svelte-check",
+        "svelte-build": "rollup -c",
+        "svelte-watch": "rollup -c -w"
     },
     "dependencies": {
         "array-sort": "^1.0.0",
         "backoff": "^2.5.0",
-        "brighterscript": "^0.39.4",
+        "brighterscript": "^0.37.1",
         "brighterscript-formatter": "^1.6.0",
         "debounce": "^1.2.0",
         "dotenv": "^6.2.0",
@@ -72,9 +75,12 @@
         "replace-last": "^1.2.6",
         "roku-debug": "^0.8.4",
         "roku-deploy": "^3.4.1",
+        "roku-test-automation": "^1.1.1",
         "semver": "^7.1.3",
         "serialize-error": "^5.0.0",
         "source-map": "^0.7.3",
+        "svelte": "^3.37.0",
+        "svelte-preprocess": "^4.7.0",
         "vscode-debugadapter": "1.33.0",
         "vscode-debugprotocol": "1.33.0",
         "vscode-languageclient": "^7.0.0",
@@ -83,6 +89,10 @@
     },
     "devDependencies": {
         "@deboxsoft/cpx": "^1.5.0",
+        "@rollup/plugin-commonjs": "^16.0.0",
+        "@rollup/plugin-node-resolve": "^10.0.0",
+        "@rollup/plugin-typescript": "^6.0.0",
+        "@tsconfig/svelte": "^1.0.10",
         "@types/chai": "^4.1.5",
         "@types/fs-extra": "^5.0.4",
         "@types/glob": "^7.1.1",
@@ -97,6 +107,7 @@
         "chai": "^4.2.0",
         "chalk": "^4.0.0",
         "changelog-parser": "^2.8.0",
+        "chokidar": "^3.5.1",
         "coveralls": "^3.0.11",
         "mocha": "^8.3.2",
         "mocha-param": "^2.0.0",
@@ -104,6 +115,10 @@
         "nyc": "^15.0.0",
         "ovsx": "^0.2.0",
         "rimraf": "^3.0.0",
+        "rollup": "^2.3.4",
+        "rollup-plugin-css-only": "^3.0.0",
+        "rollup-plugin-svelte": "^7.0.0",
+        "rollup-plugin-terser": "^7.0.0",
         "sinon": "^7.2.3",
         "source-map-support": "^0.5.16",
         "ts-mocha": "^7.0.0",
@@ -111,6 +126,7 @@
         "tslint": "^5.11.0",
         "tslint-eslint-rules": "^5.4.0",
         "typescript": "^3.8.3",
+        "typescript-json-schema": "^0.50.1",
         "vsce": "^1.81.1",
         "vscode-debugadapter-testsupport": "1.33.0",
         "yargs": "^16.2.0"
@@ -147,6 +163,18 @@
                     "name": "Rendezvous",
                     "when": "debugType == 'brightscript'",
                     "group": "Rendezvous"
+                },
+                {
+                    "type": "webview",
+                    "id": "RDBRegistryView",
+                    "name": "Registry",
+                    "when": "debugType == 'brightscript'"
+                },
+                {
+                    "type": "webview",
+                    "id": "RDBCommandsView",
+                    "name": "Commands",
+                    "when": "debugType == 'brightscript'"
                 }
             ]
         },
@@ -1380,12 +1408,6 @@
                     "description": "If set to true, the extension will automatically watch and scan the network for online Roku devices. This can be pared with the ${promptForHost} option in the launch config to display a list of online Rokus, removing the need to constantly change the host IP in your config files.",
                     "scope": "resource"
                 },
-                "brightscript.rokuAdvancedLayoutEditor.trackerTaskFileLocation": {
-                    "type": "string",
-                    "description": "This is an absolute path to the TrackerTask.xml file to be injected into your Roku channel during a debug session.",
-                    "deprecationMessage": "Deprecated. Use brightscript.debug.raleTrackerTaskFileLocation instead",
-                    "scope": "resource"
-                },
                 "brightscript.debug.raleTrackerTaskFileLocation": {
                     "type": "string",
                     "description": "This is an absolute path to the TrackerTask.xml file to be injected into your Roku channel during a debug session.",
@@ -1866,7 +1888,8 @@
     },
     "nyc": {
         "include": [
-            "src/**/!(*.spec).ts"
+            "src/**/!(*.spec).ts",
+            "ui/**/!(*.spec).ts"
         ],
         "extension": [
             ".ts"

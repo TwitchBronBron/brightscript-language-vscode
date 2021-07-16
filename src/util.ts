@@ -167,6 +167,10 @@ class Util {
         }
         this.debounceByKey[key]();
     }
+
+    public isExtensionHostRunning() {
+        return process.argv.includes('--type=extensionHost');
+    }
 }
 
 const util = new Util();

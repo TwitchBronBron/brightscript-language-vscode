@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fsExtra from 'fs-extra';
 import { FileEntry, DefaultFiles } from 'roku-deploy';
+import * as rta from 'roku-test-automation';
 import {
     CancellationToken,
     DebugConfigurationProvider,
@@ -31,6 +32,7 @@ export class BrightScriptDebugConfigurationProvider implements DebugConfiguratio
             outDir: '${workspaceFolder}/out/',
             retainDeploymentArchive: true,
             injectRaleTrackerTask: false,
+            injectRdbOnDeviceComponent: false,
             retainStagingFolder: false,
             enableVariablesPanel: true,
             enableDebuggerAutoRecovery: false,
@@ -94,8 +96,6 @@ export class BrightScriptDebugConfigurationProvider implements DebugConfiguratio
             {
                 enableSourceMaps: true,
                 enableDebugProtocol: false,
-                //config.rokuAdvancedLayoutEditor is depricated...but still need to support it for a little while
-                raleTrackerTaskFileLocation: config?.rokuAdvancedLayoutEditor?.raleTrackerTaskFileLocation
             },
             //merge in all of the brightscript.debug properties
             vscode.workspace.getConfiguration('brightscript.debug') ?? {},
@@ -187,6 +187,9 @@ export class BrightScriptDebugConfigurationProvider implements DebugConfiguratio
         }
         config.componentLibrariesPort = config.componentLibrariesPort ? config.componentLibrariesPort : 8080;
 
+        // Pass along files needed by RDB to roku-debug
+        config.rdbFilesBasePath = rta.utils.getDeviceFilesPath();
+
         // Apply any defaults to missing values
         config.type = config.type ? config.type : this.configDefaults.type;
         config.name = config.name ? config.name : this.configDefaults.name;
@@ -199,6 +202,7 @@ export class BrightScriptDebugConfigurationProvider implements DebugConfiguratio
         config.outDir = this.util.ensureTrailingSlash(config.outDir ? config.outDir : this.configDefaults.outDir);
         config.retainDeploymentArchive = config.retainDeploymentArchive === false ? false : this.configDefaults.retainDeploymentArchive;
         config.injectRaleTrackerTask = config.injectRaleTrackerTask === true ? true : this.configDefaults.injectRaleTrackerTask;
+        config.injectRdbOnDeviceComponent = config.injectRdbOnDeviceComponent === true ? true : this.configDefaults.injectRdbOnDeviceComponent;
         config.retainStagingFolder = config.retainStagingFolder === true ? true : this.configDefaults.retainStagingFolder;
         config.enableVariablesPanel = 'enableVariablesPanel' in config ? config.enableVariablesPanel : this.configDefaults.enableVariablesPanel;
         config.enableDebuggerAutoRecovery = config.enableDebuggerAutoRecovery === true ? true : this.configDefaults.enableDebuggerAutoRecovery;
@@ -504,15 +508,4 @@ export interface BrightScriptLaunchConfiguration extends LaunchConfiguration {
      * A path to an environment variables file which will be used to augment the launch config
      */
     envFile?: string;
-
-    /**
-     * @deprecated
-     */
-    rokuAdvancedLayoutEditor?: {
-        /**
-         * This is an absolute path to the TrackerTask.xml file to be injected into your Roku channel during a debug session.
-         * @deprecated
-         */
-        raleTrackerTaskFileLocation?: string;
-    };
 }

@@ -1,5 +1,8 @@
 {
-    "files.trimTrailingWhitespace": false,
+    "files.trimTrailingWhitespace": true,
+	"[markdown]": {
+		"files.trimTrailingWhitespace": false
+	},
     "files.exclude": {
         "**/.nyc_output": true,
         "**/.roku-deploy-staging": false,

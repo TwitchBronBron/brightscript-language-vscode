@@ -5,7 +5,7 @@
             "type": "extensionHost",
             "request": "launch",
             "name": "Extension",
-            "preLaunchTask": "watch",
+            "preLaunchTask": "svelte-watch",
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}"
@@ -50,7 +50,8 @@
                 "source-map-support/register",
                 "--timeout",
                 "999999",
-                "./src/**/*.spec.ts"
+                "./src/**/*.spec.ts",
+                "./ui/**/*.spec.ts"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         }

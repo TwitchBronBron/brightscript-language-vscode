@@ -1,4 +1,4 @@
-import { Command, Range, TreeDataProvider, TreeItemCollapsibleState, Uri, WorkspaceFolder, ConfigurationScope } from 'vscode';
+import type { Command, Range, TreeDataProvider, TreeItemCollapsibleState, Uri, WorkspaceFolder, ConfigurationScope, ExtensionContext } from 'vscode';
 
 afterEach(() => {
     delete vscode.workspace.workspaceFile;
@@ -56,8 +56,20 @@ export let vscode = {
     },
     context: {
         subscriptions: [],
-        asAbsolutePath: function() { }
-    },
+        asAbsolutePath: () => { return ''; },
+        extensionUri: undefined as Uri,
+        extensionPath: '',
+        storageUri: undefined as Uri,
+        storagePath: '',
+        globalStoragePath: '',
+        globalState: {} as any,
+        globalStorageUri: undefined as Uri,
+        workspaceState: {} as any,
+        environmentVariableCollection: {} as any,
+        logUri: undefined as Uri,
+        logPath: '',
+        extensionMode: 2
+    } as ExtensionContext,
     workspace: {
         workspaceFolders: [] as WorkspaceFolder[],
         workspaceFile: undefined as Uri,
@@ -114,7 +126,14 @@ export let vscode = {
             document: undefined
         },
         onDidChangeTextEditorSelection: () => { },
-        registerUriHandler: () => { }
+        registerUriHandler: () => { },
+        registerWebviewViewProvider: () => { },
+        showSaveDialog: () => {
+            return Promise.resolve('');
+        },
+        showOpenDialog: () => {
+            return Promise.resolve([]);
+        }
     },
     CompletionItemKind: {
         Function: 2
